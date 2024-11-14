@@ -1,0 +1,3 @@
+/workspaces/MdB/miProyecto/build/CMakeFiles/rebuild_cache.dir
+/workspaces/MdB/miProyecto/build/CMakeFiles/edit_cache.dir
+/workspaces/MdB/miProyecto/build/CMakeFiles/MiProyecto.dir
