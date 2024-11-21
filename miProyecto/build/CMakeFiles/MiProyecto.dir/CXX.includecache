@@ -61,8 +61,8 @@ fstream
 /workspaces/MdB/miProyecto/src/main.cpp
 iostream
 -
-string
--
 exprtk.hpp
-/workspaces/MdB/miProyecto/src/exprtk.hpp
+-
+cmath
+-
 
