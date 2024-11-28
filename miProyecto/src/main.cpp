@@ -1,41 +1,86 @@
 #include <iostream>
+#include <vector>
 #include <exprtk.hpp> // Biblioteca para evaluar funciones
-#include <cmath>      // Para abs()
+#include <cmath>      // Para abs() y log10
 
-// Tipo de datos para ExprTk
+using namespace std;
+
 typedef double T;
 typedef exprtk::symbol_table<T> symbol_table_t;
 typedef exprtk::expression<T> expression_t;
 typedef exprtk::parser<T> parser_t;
 
+// Función para mostrar el menú
+void mostrarMenu() {
+    cout << "===============================================\n";
+    cout << "                 BIENVENIDO                    \n";
+    cout << "===============================================\n";
+    cout << "Este programa evalúa funciones matemáticas.\n";
+    cout << "Puedes tabular la función o encontrar raíces usando el método de bisección.\n\n";
+    cout << "=== Instrucciones generales ===\n";
+    cout << "- Usa '*' para la multiplicación (ejemplo: 3*x).\n";
+    cout << "- Los ángulos para funciones trigonométricas deben estar en radianes.\n";
+    cout << "- Puedes usar las siguientes funciones:\n\n";
+
+    cout << "=== Funciones trigonométricas ===\n";
+    cout << "Seno        -> sin(x)\n";
+    cout << "Coseno      -> cos(x)\n";
+    cout << "Tangente    -> tan(x)\n";
+    cout << "Cotangente  -> cot(x)\n";
+    cout << "Secante     -> sec(x)\n";
+    cout << "Cosecante   -> csc(x)\n\n";
+
+    cout << "=== Funciones exponenciales y logarítmicas ===\n";
+    cout << "Exponencial -> exp(x)\n";
+    cout << "Logaritmo natural -> log(x)\n";
+    cout << "Logaritmo base 10 -> log10(x)\n\n";
+
+    cout << "=== Operaciones matemáticas básicas ===\n";
+    cout << "Suma        -> +\n";
+    cout << "Resta       -> -\n";
+    cout << "Multiplicación -> *\n";
+    cout << "División    -> /\n";
+    cout << "Potencias   -> pow(base, exponente)\n\n";
+
+    cout << "=== Ejemplos de funciones válidas ===\n";
+    cout << "1. sin(3*x)\n";
+    cout << "2. x^2 - 4\n";
+    cout << "3. exp(x) / (1 + x^2)\n";
+    cout << "4. log(x) + cos(x)\n\n";
+
+    cout << "¡Disfruta el programa!\n";
+    cout << "===============================================\n\n";
+}
+
 // Función para tabular la función
 void tabularFuncion(expression_t& expression, T& x) {
-    std::cout << "Tabulando f(x) de -3 a 3:\n";
-    for (double i = -3.0; i <= 3.0; i += 0.5) {
-        x = i; // Actualizamos el valor de x en cada iteración
-        double valor = expression.value(); // Evaluamos la función
-        std::cout << "f(" << i << ") = " << valor << "\n";
+    cout << "Tabulando f(x) de 3 a -3:\n";
+    for (int i = 3; i >= -3; --i) {
+        x = i;
+        double valor = expression.value();
+        cout << "f(" << i << ") = " << valor << "\n";
     }
 }
 
-// Función para detectar el cambio de signo
-bool detectarCambioDeSigno(expression_t& expression, T& x, double& a, double& b, double paso) {
+// Función para detectar cambios de signo entre enteros
+vector<pair<int, int>> detectarCambiosDeSigno(expression_t& expression, T& x) {
+    vector<pair<int, int>> intervalos;
     double fa, fb;
-    for (double i = -3.0; i <= 3.0; i += paso) {
+
+    // Iteramos solo sobre los enteros entre -3 y 3 (inclusive)
+    for (int i = -3; i < 3; ++i) {
         x = i;
         fa = expression.value();
-        x = i + paso;
+
+        x = i + 1;
         fb = expression.value();
 
-        // Detecta el cambio de signo
-        if (fa * fb < 0) {
-            a = i;
-            b = i + paso;
-            std::cout << "Cambio de signo detectado en el intervalo [" << a << ", " << b << "].\n";
-            return true;
+        if (fa * fb < 0) { // Cambio de signo detectado entre i y i+1
+            intervalos.push_back({i, i + 1});
         }
     }
-    return false; // No se detectó cambio de signo
+
+    return intervalos;
 }
 
 // Función del método de bisección
@@ -46,23 +91,46 @@ void biseccion(expression_t& expression, T& x, double a, double b, int iteracion
     double fb = expression.value();
 
     if (fa * fb >= 0) {
-        std::cout << "Error: La función no cambia de signo en el intervalo [" << a << ", " << b << "].\n";
+        cout << "Error: La función no cambia de signo en el intervalo [" << a << ", " << b << "].\n";
         return;
     }
 
-    std::cout << "\nMétodo de Bisección:\n";
+    cout << "\nMétodo aplicado al intervalo [" << a << ", " << b << "]:\n";
+    double c_prev = 0.0;
     for (int i = 1; i <= iteraciones; ++i) {
         double c = (a + b) / 2.0; // Punto medio
         x = c;
         double fc = expression.value();
 
-        // Mostrar cómo cambia C en cada iteración
-        std::cout << "Iteración " << i << ": c = " << c << ", f(c) = " << fc << "\n";
+        // Error relativo
+        double errorRelativo = i > 1 ? abs((c - c_prev) / c) : 0.0;
+        c_prev = c;
+
+        // Mostrar iteración
+        cout << "Iteración " << i << ": c = " << c << ", f(c) = " << fc;
+        if (i > 1) {
+            cout << ", Er = " << errorRelativo;
+        }
+
+        // Calcular la cantidad de C.S.
+        int cifrasSignificativas = 0;
+        if (errorRelativo > 0) {
+            cifrasSignificativas = ceil(-log10(errorRelativo));
+        }
+
+        cout << ", C.S. = " << cifrasSignificativas << "\n";
+
+        // Mostrar las cifras significativas
+        cout << "Cifras significativas en esta iteración: ";
+        for (int j = 0; j < cifrasSignificativas; ++j) {
+            cout << "9";  // Ejemplo de cómo mostrar las cifras significativas
+        }
+        cout << "\n";
 
         // Verifica si encontramos la raíz
-        if (std::abs(fc) < 1e-6) {
-            std::cout << "Raíz encontrada en c = " << c << " después de " << i << " iteraciones.\n";
-            return;
+        if (abs(fc) < 1e-6) {
+            cout << "Raíz aproximada encontrada en c = " << c << " después de " << i << " iteraciones.\n";
+            break;
         }
 
         // Decide el siguiente intervalo
@@ -74,15 +142,15 @@ void biseccion(expression_t& expression, T& x, double a, double b, int iteracion
             a = c;
         }
     }
-
-    std::cout << "Método finalizado después de " << iteraciones << " iteraciones.\n";
 }
 
 // Función principal
 int main() {
-    std::string funcion;
-    std::cout << "Introduce una función (por ejemplo, sin(3*x), x^2 - 4, exp(x), etc.): ";
-    std::cin >> funcion;
+    mostrarMenu();
+
+    string funcion;
+    cout << "\nIngresa la función que deseas evaluar: ";
+    cin >> funcion;
 
     // Configuración de ExprTk
     symbol_table_t symbol_table;
@@ -95,32 +163,34 @@ int main() {
 
     parser_t parser;
     if (!parser.compile(funcion, expression)) {
-        std::cerr << "Error al compilar la función.\n";
+        cerr << "Error al compilar la función.\n";
         return 1;
     }
-
-    // Depuración: Verificar el valor de la función en x = -3
-    x = -3;
-    double valor_prueba = expression.value();
-    std::cout << "Valor de prueba para x = -3: f(-3) = " << valor_prueba << "\n";
 
     // Tabular la función
     tabularFuncion(expression, x);
 
-    // Detectar el cambio de signo automáticamente
-    double a, b;
-    if (!detectarCambioDeSigno(expression, x, a, b, 0.5)) {
-        std::cout << "No se detectó cambio de signo en el rango de -3 a 3.\n";
-        return 1;
+    // Detectar todos los cambios de signo
+    vector<pair<int, int>> intervalos = detectarCambiosDeSigno(expression, x);
+
+    // Mostrar intervalos con cambios de signo
+    if (!intervalos.empty()) {
+        cout << "\nIntervalos con cambios de signo detectados:\n";
+        for (const auto& intervalo : intervalos) {
+            cout << "[" << intervalo.first << ", " << intervalo.second << "]\n";
+        }
     }
 
-    // Pedir el número de iteraciones para el método de bisección
-    int iteraciones;
-    std::cout << "Introduce el número de iteraciones deseadas para el método de bisección: ";
-    std::cin >> iteraciones;
+    // Pedir iteraciones para los intervalos
+    if (!intervalos.empty()) {
+        int iteraciones;
+        cout << "\nIntroduce el número de iteraciones deseadas para cada intervalo: ";
+        cin >> iteraciones;
 
-    // Ejecutar el método de bisección
-    biseccion(expression, x, a, b, iteraciones);
+        for (const auto& intervalo : intervalos) {
+            biseccion(expression, x, intervalo.first, intervalo.second, iteraciones);
+        }
+    }
 
     return 0;
 }
