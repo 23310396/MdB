@@ -62,21 +62,28 @@ void tabularFuncion(expression_t& expression, T& x) {
     }
 }
 
-// Función para detectar cambios de signo entre enteros
-vector<pair<int, int>> detectarCambiosDeSigno(expression_t& expression, T& x) {
+// Función para detectar raíces exactas y cambios de signo
+vector<pair<int, int>> detectarCambiosDeSigno(expression_t& expression, T& x, vector<double>& raicesExactas) {
     vector<pair<int, int>> intervalos;
     double fa, fb;
 
-    // Iteramos solo sobre los enteros entre -3 y 3 (inclusive)
-    for (int i = -3; i < 3; ++i) {
+    // Se utiliza solo números enteros entre 3 y -3
+    for (int i = 3; i > -3; --i) {
         x = i;
         fa = expression.value();
 
-        x = i + 1;
-        fb = expression.value();
+        if (abs(fa) < 1e-6) { // Raíz exacta detectada
+            raicesExactas.push_back(i);
+            continue;
+        }
 
-        if (fa * fb < 0) { // Cambio de signo detectado entre i y i+1
-            intervalos.push_back({i, i + 1});
+        if (i > -3) {
+            x = i - 1; // Evaluamos el siguiente valor (es decir, el intervalo [i, i-1])
+            fb = expression.value();
+            
+            if (fa * fb < 0) { // Cambio de signo detectado
+                intervalos.emplace_back(i, i - 1);
+            }
         }
     }
 
@@ -110,20 +117,6 @@ void biseccion(expression_t& expression, T& x, double a, double b, int iteracion
         cout << "Iteración " << i << ": c = " << c << ", f(c) = " << fc;
         if (i > 1) {
             cout << ", Er = " << errorRelativo;
-        }
-
-        // Calcular la cantidad de C.S.
-        int cifrasSignificativas = 0;
-        if (errorRelativo > 0) {
-            cifrasSignificativas = ceil(-log10(errorRelativo));
-        }
-
-        cout << ", C.S. = " << cifrasSignificativas << "\n";
-
-        // Mostrar las cifras significativas
-        cout << "Cifras significativas en esta iteración: ";
-        for (int j = 0; j < cifrasSignificativas; ++j) {
-            cout << "9";  // Ejemplo de cómo mostrar las cifras significativas
         }
         cout << "\n";
 
@@ -170,26 +163,37 @@ int main() {
     // Tabular la función
     tabularFuncion(expression, x);
 
-    // Detectar todos los cambios de signo
-    vector<pair<int, int>> intervalos = detectarCambiosDeSigno(expression, x);
+    // Detectar todos los cambios de signo y raíces exactas
+    vector<double> raicesExactas;
+    vector<pair<int, int>> intervalos = detectarCambiosDeSigno(expression, x, raicesExactas);
 
-    // Mostrar intervalos con cambios de signo
-    if (!intervalos.empty()) {
-        cout << "\nIntervalos con cambios de signo detectados:\n";
-        for (const auto& intervalo : intervalos) {
-            cout << "[" << intervalo.first << ", " << intervalo.second << "]\n";
+    // Mostrar las raíces exactas
+    if (!raicesExactas.empty()) {
+        cout << "\nRaíces exactas encontradas en los siguientes valores: ";
+        for (double raiz : raicesExactas) {
+            cout << raiz << " ";
         }
+        cout << endl;
     }
 
-    // Pedir iteraciones para los intervalos
+    // Mostrar los intervalos con cambios de signo
     if (!intervalos.empty()) {
-        int iteraciones;
-        cout << "\nIntroduce el número de iteraciones deseadas para cada intervalo: ";
-        cin >> iteraciones;
-
+        cout << "\nIntervalos con cambio de signo: ";
         for (const auto& intervalo : intervalos) {
-            biseccion(expression, x, intervalo.first, intervalo.second, iteraciones);
+            cout << "[" << intervalo.first << ", " << intervalo.second << "] ";
         }
+        cout << endl;
+    } else {
+        cout << "No se detectaron intervalos con cambio de signo.\n";
+    }
+
+    // Realizar el método de bisección para cada intervalo
+    int iteraciones;
+    cout << "\nIngresa el número de iteraciones: ";
+    cin >> iteraciones;
+
+    for (const auto& intervalo : intervalos) {
+        biseccion(expression, x, intervalo.first, intervalo.second, iteraciones);
     }
 
     return 0;
