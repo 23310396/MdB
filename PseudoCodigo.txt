@@ -1,23 +1,47 @@
-Inicio
-    Mostrar el menú con las instrucciones para ingresar la función
-    Pedir al usuario que ingrese la función a evaluar
-    Compilar la función utilizando la librería ExprTk
-    Mostrar la tabulación de la función en el rango de [3, -3]
-    
-    Detectar cambios de signo y raíces exactas en el intervalo [3, -3]
-        Para cada número entero entre 3 y -3:
-            Evaluar la función en el punto
-            Si f(x) == 0, es una raíz exacta
-            Si hay un cambio de signo en el intervalo, guardarlo
-    
-    Mostrar las raíces exactas encontradas y los intervalos con cambios de signo
-    
-    Pedir al usuario que ingrese el número de iteraciones para el método de bisección
-    
-    Para cada intervalo con cambio de signo:
-        Realizar el método de bisección con el número de iteraciones dado
-        Mostrar los resultados de cada iteración (valor de C y el error relativo)
-    
-    Mostrar las raíces aproximadas encontradas con el método de bisección
-    
-Fin
+Inicio  
+    Mostrar menú de opciones e instrucciones del programa.  
+        - Explicar cómo escribir funciones (seno: sin(x), exponenciales: exp(x), etc.).  
+        - Mencionar que los ángulos deben estar en radianes.  
+        - Aclarar cómo escribir operadores (* para multiplicación, etc.).  
+
+    Solicitar al usuario que introduzca la función matemática.  
+    Compilar la función utilizando ExprTk.  
+
+    Mostrar un mensaje: "Tabulando la función desde 3 hasta -3..."  
+    Tabular la función en los números enteros entre 3 y -3 (incluyendo ambos extremos).  
+        - Para cada valor entero x en el rango [3, -3] (en orden descendente):  
+            - Evaluar f(x).  
+            - Almacenar el resultado.  
+
+    Detectar raíces exactas y cambios de signo.  
+        - Inicializar lista de raíces exactas y lista de intervalos con cambios de signo.  
+        - Para cada par consecutivo de valores tabulados:  
+            - Si f(x) == 0, agregar x a la lista de raíces exactas.  
+            - Si f(x1) * f(x2) < 0, agregar [x1, x2] a la lista de intervalos con cambios de signo.  
+
+    Mostrar raíces exactas (si las hay).  
+    Mostrar intervalos con cambios de signo (si los hay).  
+
+    Solicitar al usuario el número de iteraciones para aplicar el método de bisección.  
+
+    Para cada intervalo con cambio de signo [a, b]:  
+        Inicializar variables:  
+            - a, b (límites del intervalo).  
+            - c (punto medio del intervalo).  
+        Repetir por el número de iteraciones solicitadas:  
+            - Calcular c = (a + b) / 2.  
+            - Evaluar f(c).  
+            - Determinar nuevo intervalo:  
+                - Si f(a) * f(c) < 0, actualizar b = c.  
+                - Si f(b) * f(c) < 0, actualizar a = c.  
+            - Calcular el error relativo:  
+                - Si no es la primera iteración, Er = |(c_actual - c_anterior) / c_actual| * 100.  
+            - Mostrar valores de a, b, c, Er (excepto en la primera iteración).  
+
+        Al finalizar las iteraciones, mostrar el valor aproximado de la raíz en el intervalo.  
+
+    Mostrar todas las raíces encontradas:  
+        - Raíces exactas.  
+        - Raíces aproximadas con sus intervalos correspondientes.  
+
+Fin  
